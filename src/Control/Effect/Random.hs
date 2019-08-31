@@ -11,8 +11,6 @@ module Control.Effect.Random
   -- * Re-exports
 , Carrier
 , Member
-, R.MonadRandom(..)
-, R.MonadInterleave(..)
 , run
 ) where
 
