@@ -1,7 +1,10 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, ScopedTypeVariables, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, ScopedTypeVariables, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Random
 ( -- * Random effect
   Random(..)
+, getRandom
+, getRandomR
+, interleave
   -- * Random carrier
 , runRandom
 , evalRandom
@@ -42,6 +45,16 @@ instance Effect Random where
   handle state handler (Random       k) = Random                            (handler . (<$ state) . k)
   handle state handler (RandomR r    k) = RandomR r                         (handler . (<$ state) . k)
   handle state handler (Interleave m k) = Interleave (handler (m <$ state)) (handler . fmap k)
+
+
+getRandom :: (Carrier sig m, Member Random sig, R.Random a) => m a
+getRandom = send (Random pure)
+
+getRandomR :: (Carrier sig m, Member Random sig, R.Random a) => (a, a) -> m a
+getRandomR interval = send (RandomR interval pure)
+
+interleave :: (Carrier sig m, Member Random sig) => m a -> m a
+interleave m = send (Interleave m pure)
 
 
 -- | Run a random computation starting from a given generator.
