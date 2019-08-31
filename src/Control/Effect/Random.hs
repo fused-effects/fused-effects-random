@@ -11,8 +11,8 @@ module Control.Effect.Random
   -- * Re-exports
 , Carrier
 , Member
-, MonadRandom(..)
-, MonadInterleave(..)
+, R.MonadRandom(..)
+, R.MonadInterleave(..)
 , run
 ) where
 
@@ -22,7 +22,7 @@ import Control.Effect.State
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.Fix
-import Control.Monad.Random.Class (MonadInterleave(..), MonadRandom(..))
+import qualified Control.Monad.Random.Class as R
 import Control.Monad.IO.Class (MonadIO(..))
 import Control.Monad.Trans.Class
 import qualified System.Random as R (Random(..), RandomGen(..), StdGen, newStdGen)
@@ -71,7 +71,7 @@ evalRandomIO m = liftIO R.newStdGen >>= flip evalRandom m
 newtype RandomC g m a = RandomC { runRandomC :: StateC g m a }
   deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
-instance (Carrier sig m, Effect sig, R.RandomGen g) => MonadRandom (RandomC g m) where
+instance (Carrier sig m, Effect sig, R.RandomGen g) => R.MonadRandom (RandomC g m) where
   getRandom = RandomC $ do
     (a, g') <- gets R.random
     a <$ put (g' :: g)
@@ -80,12 +80,12 @@ instance (Carrier sig m, Effect sig, R.RandomGen g) => MonadRandom (RandomC g m)
     (a, g') <- gets (R.randomR r)
     a <$ put (g' :: g)
   {-# INLINE getRandomR #-}
-  getRandomRs interval = (:) <$> getRandomR interval <*> getRandomRs interval
+  getRandomRs interval = (:) <$> R.getRandomR interval <*> R.getRandomRs interval
   {-# INLINE getRandomRs #-}
-  getRandoms = (:) <$> getRandom <*> getRandoms
+  getRandoms = (:) <$> R.getRandom <*> R.getRandoms
   {-# INLINE getRandoms #-}
 
-instance (Carrier sig m, Effect sig, R.RandomGen g) => MonadInterleave (RandomC g m) where
+instance (Carrier sig m, Effect sig, R.RandomGen g) => R.MonadInterleave (RandomC g m) where
   interleave m = RandomC $ do
     (g1, g2) <- gets R.split
     put (g1 :: g)
@@ -94,9 +94,9 @@ instance (Carrier sig m, Effect sig, R.RandomGen g) => MonadInterleave (RandomC 
   {-# INLINE interleave #-}
 
 instance (Carrier sig m, Effect sig, R.RandomGen g) => Carrier (Random :+: sig) (RandomC g m) where
-  eff (L (Random       k)) = getRandom >>= k
-  eff (L (RandomR r    k)) = getRandomR r >>= k
-  eff (L (Interleave m k)) = interleave m >>= k
+  eff (L (Random       k)) = R.getRandom >>= k
+  eff (L (RandomR r    k)) = R.getRandomR r >>= k
+  eff (L (Interleave m k)) = R.interleave m >>= k
   eff (R other)            = RandomC (eff (R (handleCoercible other)))
   {-# INLINE eff #-}
 
