@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, ScopedTypeVariables, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, ScopedTypeVariables, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Random
 ( -- * Random effect
   Random(..)
@@ -12,14 +12,13 @@ module Control.Effect.Random
 , evalRandomIO
 , RandomC(..)
   -- * Re-exports
-, Carrier
-, Member
+, Has
 , run
 ) where
 
+import Control.Algebra
 import Control.Applicative (Alternative(..))
-import Control.Effect.Carrier
-import Control.Effect.State
+import Control.Carrier.State.Strict
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.Fix
@@ -35,25 +34,19 @@ data Random m k
 
 deriving instance Functor m => Functor (Random m)
 
-instance HFunctor Random where
-  hmap f (Random       k) = Random           (f . k)
-  hmap f (RandomR r    k) = RandomR r        (f . k)
-  hmap f (Interleave m k) = Interleave (f m) (f . k)
-  {-# INLINE hmap #-}
-
 instance Effect Random where
-  handle state handler (Random       k) = Random                            (handler . (<$ state) . k)
-  handle state handler (RandomR r    k) = RandomR r                         (handler . (<$ state) . k)
-  handle state handler (Interleave m k) = Interleave (handler (m <$ state)) (handler . fmap k)
+  thread state handler (Random       k) = Random                            (handler . (<$ state) . k)
+  thread state handler (RandomR r    k) = RandomR r                         (handler . (<$ state) . k)
+  thread state handler (Interleave m k) = Interleave (handler (m <$ state)) (handler . fmap k)
 
 
-getRandom :: (Carrier sig m, Member Random sig, R.Random a) => m a
+getRandom :: (Has Random sig m, R.Random a) => m a
 getRandom = send (Random pure)
 
-getRandomR :: (Carrier sig m, Member Random sig, R.Random a) => (a, a) -> m a
+getRandomR :: (Has Random sig m, R.Random a) => (a, a) -> m a
 getRandomR interval = send (RandomR interval pure)
 
-interleave :: (Carrier sig m, Member Random sig) => m a -> m a
+interleave :: (Has Random sig m) => m a -> m a
 interleave m = send (Interleave m pure)
 
 
@@ -82,7 +75,7 @@ evalRandomIO m = liftIO R.newStdGen >>= flip evalRandom m
 newtype RandomC g m a = RandomC { runRandomC :: StateC g m a }
   deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
-instance (Carrier sig m, Effect sig, R.RandomGen g) => R.MonadRandom (RandomC g m) where
+instance (Algebra sig m, Effect sig, R.RandomGen g) => R.MonadRandom (RandomC g m) where
   getRandom = getRandom
   {-# INLINE getRandom #-}
   getRandomR = getRandomR
@@ -92,27 +85,27 @@ instance (Carrier sig m, Effect sig, R.RandomGen g) => R.MonadRandom (RandomC g 
   getRandoms = (:) <$> R.getRandom <*> R.getRandoms
   {-# INLINE getRandoms #-}
 
-instance (Carrier sig m, Effect sig, R.RandomGen g) => R.MonadInterleave (RandomC g m) where
+instance (Algebra sig m, Effect sig, R.RandomGen g) => R.MonadInterleave (RandomC g m) where
   interleave = interleave
   {-# INLINE interleave #-}
 
-instance (Carrier sig m, Effect sig, R.RandomGen g) => Carrier (Random :+: sig) (RandomC g m) where
-  eff (L (Random       k)) = RandomC $ do
+instance (Algebra sig m, Effect sig, R.RandomGen g) => Algebra (Random :+: sig) (RandomC g m) where
+  alg (L (Random       k)) = RandomC $ do
     (a, g') <- gets R.random
     put (g' :: g)
     runRandomC (k a)
-  eff (L (RandomR r    k)) = RandomC $ do
+  alg (L (RandomR r    k)) = RandomC $ do
     (a, g') <- gets (R.randomR r)
     put (g' :: g)
     runRandomC (k a)
-  eff (L (Interleave m k)) = RandomC $ do
+  alg (L (Interleave m k)) = RandomC $ do
     (g1, g2) <- gets R.split
     put (g1 :: g)
     a <- runRandomC m
     put g2
     runRandomC (k a)
-  eff (R other)            = RandomC (eff (R (handleCoercible other)))
-  {-# INLINE eff #-}
+  alg (R other)            = RandomC (handleCoercible other)
+  {-# INLINE alg #-}
 
 
 -- $setup
