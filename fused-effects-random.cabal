@@ -37,10 +37,14 @@ library
   import:              common
   exposed-modules:
     Control.Effect.Random
-  build-depends:       base >=4.12 && <4.13
+  build-depends:       base >=4.10 && <4.15
                      , fused-effects ^>= 0.5
                      , MonadRandom
                      , random
                      , transformers
   hs-source-dirs:      src
   default-language:    Haskell2010
+
+source-repository head
+  type:     git
+  location: https://github.com/fused-effects/fused-effects-random
