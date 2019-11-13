@@ -1,7 +1,7 @@
 cabal-version:       2.2
 
 name:                fused-effects-random
-version:             0.0.0.0
+version:             1.0.0.0
 synopsis:            Random number generation for fused-effects.
 description:         Random number generation as an effect using fused-effects.
 homepage:            https://github.com/fused-effects/fused-effects-random
@@ -38,10 +38,10 @@ library
   exposed-modules:
     Control.Effect.Random
   build-depends:       base >=4.10 && <4.15
-                     , fused-effects ^>= 0.5
-                     , MonadRandom
-                     , random
-                     , transformers
+                     , fused-effects ^>= 1
+                     , MonadRandom ^>= 0.5.1.1
+                     , random ^>= 1.1
+                     , transformers >= 0.4 && <0.6
   hs-source-dirs:      src
   default-language:    Haskell2010
 
