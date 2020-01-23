@@ -37,6 +37,7 @@ common common
 library
   import: common
   exposed-modules:
+    Control.Carrier.Random.Gen
     Control.Effect.Random
   build-depends:
       base >=4.10 && <4.15
