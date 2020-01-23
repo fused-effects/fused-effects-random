@@ -12,6 +12,8 @@ module Control.Effect.Random
 , evalRandomIO
 , RandomC(..)
   -- * Re-exports
+, Algebra
+, Effect
 , Has
 , run
 ) where
