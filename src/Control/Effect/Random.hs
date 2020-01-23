@@ -72,6 +72,7 @@ interleave m = send (Interleave m pure)
 
 -- * Non-uniform distributions
 
+-- | Produce a random variable in an expnoential distribution with the given scale.
 exponential :: (R.Random a, Floating a, Has Random sig m) => a -> m a
 exponential a = do
   x <- uniform
