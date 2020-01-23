@@ -66,5 +66,5 @@ instance (Algebra sig m, Effect sig, R.RandomGen g) => Algebra (Random :+: sig) 
       a <- runRandomC m
       put g2
       runRandomC (k a)
-    R other            -> RandomC (alg (R (handleCoercible other)))
+    R other            -> RandomC (send (handleCoercible other))
   {-# INLINE alg #-}
