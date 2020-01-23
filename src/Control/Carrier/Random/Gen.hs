@@ -58,8 +58,8 @@ newtype RandomC g m a = RandomC { runRandomC :: StateC g m a }
 
 instance (Algebra sig m, Effect sig, R.RandomGen g) => Algebra (Random :+: sig) (RandomC g m) where
   alg = \case
-    L (Random       k) -> state R.random      >>= k
-    L (RandomR r    k) -> state (R.randomR r) >>= k
+    L (Uniform      k) -> state R.random      >>= k
+    L (UniformR r   k) -> state (R.randomR r) >>= k
     L (Interleave m k) -> do
       g2 <- state R.split
       a <- m

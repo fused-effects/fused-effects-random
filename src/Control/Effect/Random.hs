@@ -19,23 +19,23 @@ import           Control.Algebra
 import qualified System.Random as R (Random(..))
 
 data Random m k
-  = forall a . R.Random a => Random (a -> m k)
-  | forall a . R.Random a => RandomR (a, a) (a -> m k)
+  = forall a . R.Random a => Uniform (a -> m k)
+  | forall a . R.Random a => UniformR (a, a) (a -> m k)
   | forall a . Interleave (m a) (a -> m k)
 
 deriving instance Functor m => Functor (Random m)
 
 instance HFunctor Random where
   hmap f = \case
-    Random       k -> Random           (f . k)
-    RandomR r    k -> RandomR r        (f . k)
+    Uniform      k -> Uniform           (f . k)
+    UniformR r   k -> UniformR r        (f . k)
     Interleave m k -> Interleave (f m) (f . k)
   {-# INLINE hmap #-}
 
 instance Effect Random where
   thread state handler = \case
-    Random       k -> Random                            (handler . (<$ state) . k)
-    RandomR r    k -> RandomR r                         (handler . (<$ state) . k)
+    Uniform      k -> Uniform                            (handler . (<$ state) . k)
+    UniformR r   k -> UniformR r                         (handler . (<$ state) . k)
     Interleave m k -> Interleave (handler (m <$ state)) (handler . fmap k)
   {-# INLINE thread #-}
 
@@ -46,7 +46,7 @@ instance Effect Random where
 -- * fractional types, the range is normally the semi-closed interval [0,1).
 -- * for 'Integer', the range is (arbitrarily) the range of 'Int'.
 random :: (R.Random a, Has Random sig m) => m a
-random = send (Random pure)
+random = send (Uniform pure)
 
 -- | Produce a random variable uniformly distributed in the given range.
 --
@@ -54,7 +54,7 @@ random = send (Random pure)
 -- 'Data.Ix.inRange' (a, b) '<$>' 'randomR' (a, b) = 'pure' 'True'
 -- @
 randomR :: (R.Random a, Has Random sig m) => (a, a) -> m a
-randomR interval = send (RandomR interval pure)
+randomR interval = send (UniformR interval pure)
 
 -- | Run a computation by splitting the generator, using one half for the passed computation and the other for the continuation.
 --
