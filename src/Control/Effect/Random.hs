@@ -61,5 +61,5 @@ randomR interval = send (RandomR interval pure)
 -- @
 -- 'interleave' ('pure' a) = 'pure' a
 -- @
-interleave :: (Has Random sig m) => m a -> m a
+interleave :: Has Random sig m => m a -> m a
 interleave m = send (Interleave m pure)
