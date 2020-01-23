@@ -21,7 +21,6 @@ import           Control.Monad (MonadPlus)
 import qualified Control.Monad.Fail as Fail
 import           Control.Monad.Fix
 import           Control.Monad.IO.Class (MonadIO(..))
-import qualified Control.Monad.Random.Class as R
 import           Control.Monad.Trans.Class
 import qualified System.Random as R (Random(..), RandomGen(..), StdGen, newStdGen)
 
@@ -49,20 +48,6 @@ evalRandomIO m = liftIO R.newStdGen >>= flip evalRandom m
 
 newtype RandomC g m a = RandomC { runRandomC :: StateC g m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
-
-instance (Algebra sig m, Effect sig, R.RandomGen g) => R.MonadRandom (RandomC g m) where
-  getRandom = getRandom
-  {-# INLINE getRandom #-}
-  getRandomR = getRandomR
-  {-# INLINE getRandomR #-}
-  getRandomRs interval = (:) <$> R.getRandomR interval <*> R.getRandomRs interval
-  {-# INLINE getRandomRs #-}
-  getRandoms = (:) <$> R.getRandom <*> R.getRandoms
-  {-# INLINE getRandoms #-}
-
-instance (Algebra sig m, Effect sig, R.RandomGen g) => R.MonadInterleave (RandomC g m) where
-  interleave = interleave
-  {-# INLINE interleave #-}
 
 instance (Algebra sig m, Effect sig, R.RandomGen g) => Algebra (Random :+: sig) (RandomC g m) where
   alg (L (Random       k)) = RandomC $ do
