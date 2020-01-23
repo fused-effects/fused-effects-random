@@ -37,6 +37,11 @@ instance Effect Random where
   {-# INLINE thread #-}
 
 
+-- | Produce a random variable uniformly distributed in a range determined by its type’s 'R.Random' instance. For example:
+--
+-- * bounded types (instances of 'Bounded', such as 'Char') typically sample all of the constructors.
+-- * fractional types, the range is normally the semi-closed interval [0,1).
+-- * for 'Integer', the range is (arbitrarily) the range of 'Int'.
 random :: (Has Random sig m, R.Random a) => m a
 random = send (Random pure)
 
