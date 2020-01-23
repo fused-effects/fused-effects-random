@@ -41,6 +41,10 @@ random :: (Has Random sig m, R.Random a) => m a
 random = send (Random pure)
 
 -- | Produce a random variable uniformly distributed in the given range.
+--
+-- @
+-- 'Data.Ix.inRange' (a, b) '<$>' 'randomR' (a, b) = 'pure' 'True'
+-- @
 randomR :: (Has Random sig m, R.Random a) => (a, a) -> m a
 randomR interval = send (RandomR interval pure)
 
