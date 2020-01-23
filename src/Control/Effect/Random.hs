@@ -4,8 +4,8 @@
 module Control.Effect.Random
 ( -- * Random effect
   Random(..)
-, getRandom
-, getRandomR
+, random
+, randomR
 , interleave
   -- * Re-exports
 , Algebra
@@ -37,11 +37,11 @@ instance Effect Random where
   {-# INLINE thread #-}
 
 
-getRandom :: (Has Random sig m, R.Random a) => m a
-getRandom = send (Random pure)
+random :: (Has Random sig m, R.Random a) => m a
+random = send (Random pure)
 
-getRandomR :: (Has Random sig m, R.Random a) => (a, a) -> m a
-getRandomR interval = send (RandomR interval pure)
+randomR :: (Has Random sig m, R.Random a) => (a, a) -> m a
+randomR interval = send (RandomR interval pure)
 
 interleave :: (Has Random sig m) => m a -> m a
 interleave m = send (Interleave m pure)
