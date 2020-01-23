@@ -43,13 +43,3 @@ getRandomR interval = send (RandomR interval pure)
 
 interleave :: (Has Random sig m) => m a -> m a
 interleave m = send (Interleave m pure)
-
-
--- $setup
--- >>> :seti -XFlexibleContexts
--- >>> import System.Random
--- >>> import Test.QuickCheck
--- >>> import Control.Effect.Pure
--- >>> import Control.Effect.NonDet
--- >>> newtype PureGen = PureGen Int deriving (Eq, Show)
--- >>> instance RandomGen PureGen where next (PureGen i) = (i, PureGen i) ; split g = (g, g)
