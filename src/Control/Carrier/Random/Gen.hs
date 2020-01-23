@@ -1,5 +1,6 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeOperators #-}
@@ -50,19 +51,20 @@ newtype RandomC g m a = RandomC { runRandomC :: StateC g m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
 instance (Algebra sig m, Effect sig, R.RandomGen g) => Algebra (Random :+: sig) (RandomC g m) where
-  alg (L (Random       k)) = RandomC $ do
-    (a, g') <- gets R.random
-    put (g' :: g)
-    runRandomC (k a)
-  alg (L (RandomR r    k)) = RandomC $ do
-    (a, g') <- gets (R.randomR r)
-    put (g' :: g)
-    runRandomC (k a)
-  alg (L (Interleave m k)) = RandomC $ do
-    (g1, g2) <- gets R.split
-    put (g1 :: g)
-    a <- runRandomC m
-    put g2
-    runRandomC (k a)
-  alg (R other)            = RandomC (alg (R (handleCoercible other)))
+  alg = \case
+    L (Random       k) -> RandomC $ do
+      (a, g') <- gets R.random
+      put (g' :: g)
+      runRandomC (k a)
+    L (RandomR r    k) -> RandomC $ do
+      (a, g') <- gets (R.randomR r)
+      put (g' :: g)
+      runRandomC (k a)
+    L (Interleave m k) -> RandomC $ do
+      (g1, g2) <- gets R.split
+      put (g1 :: g)
+      a <- runRandomC m
+      put g2
+      runRandomC (k a)
+    R other            -> RandomC (alg (R (handleCoercible other)))
   {-# INLINE alg #-}
