@@ -54,5 +54,9 @@ randomR :: (Has Random sig m, R.Random a) => (a, a) -> m a
 randomR interval = send (RandomR interval pure)
 
 -- | Run a computation by splitting the generator, using one half for the passed computation and the other for the continuation.
+--
+-- @
+-- 'interleave' ('pure' a) = 'pure' a
+-- @
 interleave :: (Has Random sig m) => m a -> m a
 interleave m = send (Interleave m pure)
