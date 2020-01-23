@@ -68,7 +68,5 @@ instance (Algebra sig m, Effect sig, R.RandomGen g) => Algebra (Random :+: sig) 
     R other            -> RandomC (send (handleCoercible other))
     where
     state :: (g -> (a, g)) -> RandomC g m a
-    state f = do
-      ~(a, g') <- RandomC (gets f)
-      a <$ RandomC (put g')
+    state f = RandomC (gets f >>= \ ~(a, g') -> a <$ put g')
   {-# INLINE alg #-}
