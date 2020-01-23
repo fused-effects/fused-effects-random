@@ -52,19 +52,19 @@ newtype RandomC g m a = RandomC { runRandomC :: StateC g m a }
 
 instance (Algebra sig m, Effect sig, R.RandomGen g) => Algebra (Random :+: sig) (RandomC g m) where
   alg = \case
-    L (Random       k) -> RandomC $ do
-      (a, g') <- gets R.random
-      put (g' :: g)
-      runRandomC (k a)
-    L (RandomR r    k) -> RandomC $ do
-      (a, g') <- gets (R.randomR r)
-      put (g' :: g)
-      runRandomC (k a)
-    L (Interleave m k) -> RandomC $ do
-      (g1, g2) <- gets R.split
-      put (g1 :: g)
-      a <- runRandomC m
-      put g2
-      runRandomC (k a)
+    L (Random       k) -> do
+      (a, g') <- RandomC (gets R.random)
+      RandomC (put (g' :: g))
+      k a
+    L (RandomR r    k) -> do
+      (a, g') <- RandomC (gets (R.randomR r))
+      RandomC (put (g' :: g))
+      k a
+    L (Interleave m k) -> do
+      (g1, g2) <- RandomC (gets R.split)
+      RandomC (put (g1 :: g))
+      a <- m
+      RandomC (put g2)
+      k a
     R other            -> RandomC (send (handleCoercible other))
   {-# INLINE alg #-}
