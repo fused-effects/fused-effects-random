@@ -45,7 +45,7 @@ instance Effect Random where
 -- * bounded types (instances of 'Bounded', such as 'Char') typically sample all of the constructors.
 -- * fractional types, the range is normally the semi-closed interval [0,1).
 -- * for 'Integer', the range is (arbitrarily) the range of 'Int'.
-random :: (Has Random sig m, R.Random a) => m a
+random :: (R.Random a, Has Random sig m) => m a
 random = send (Random pure)
 
 -- | Produce a random variable uniformly distributed in the given range.
@@ -53,7 +53,7 @@ random = send (Random pure)
 -- @
 -- 'Data.Ix.inRange' (a, b) '<$>' 'randomR' (a, b) = 'pure' 'True'
 -- @
-randomR :: (Has Random sig m, R.Random a) => (a, a) -> m a
+randomR :: (R.Random a, Has Random sig m) => (a, a) -> m a
 randomR interval = send (RandomR interval pure)
 
 -- | Run a computation by splitting the generator, using one half for the passed computation and the other for the continuation.
