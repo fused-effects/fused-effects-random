@@ -27,19 +27,25 @@ import qualified System.Random as R (Random(..), RandomGen(..), StdGen, newStdGe
 
 -- | Run a random computation starting from a given generator.
 --
---   prop> run (runRandom a (pure b)) = (a, b)
+-- @
+-- 'runRandom' g ('pure' b) = 'pure' (g, b)
+-- @
 runRandom :: g -> RandomC g m a -> m (g, a)
 runRandom g = runState g . runRandomC
 
 -- | Run a random computation starting from a given generator and discarding the final generator.
 --
---   prop> run (evalRandom a (pure b)) = b
+-- @
+-- 'evalRandom' g ('pure' b) = 'pure' b
+-- @
 evalRandom :: Functor m => g -> RandomC g m a -> m a
 evalRandom g = fmap snd . runRandom g
 
 -- | Run a random computation starting from a given generator and discarding the final result.
 --
---   prop> run (execRandom a (pure b)) = a
+-- @
+-- 'execRandom' g ('pure' b) = g
+-- @
 execRandom :: Functor m => g -> RandomC g m a -> m g
 execRandom g = fmap fst . runRandom g
 
