@@ -12,6 +12,8 @@ module Control.Carrier.Random.Gen
 , execRandom
 , evalRandomSystem
 , RandomC(..)
+  -- * Random effect
+, module Control.Effect.Random
 ) where
 
 import           Control.Algebra
