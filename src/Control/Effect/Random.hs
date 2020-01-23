@@ -8,6 +8,8 @@ module Control.Effect.Random
 , uniform
 , uniformR
 , interleave
+  -- * Non-uniform distributions
+, exponential
   -- * Re-exports
 , Algebra
 , Effect
@@ -63,3 +65,11 @@ uniformR interval = send (UniformR interval pure)
 -- @
 interleave :: Has Random sig m => m a -> m a
 interleave m = send (Interleave m pure)
+
+
+-- * Non-uniform distributions
+
+exponential :: (R.Random a, Floating a, Has Random sig m) => a -> m a
+exponential a = do
+  x <- uniform
+  pure $! -log x / a
