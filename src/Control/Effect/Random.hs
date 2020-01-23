@@ -20,7 +20,7 @@ import Control.Algebra
 import Control.Applicative (Alternative(..))
 import Control.Carrier.State.Strict
 import Control.Monad (MonadPlus(..))
-import Control.Monad.Fail
+import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import qualified Control.Monad.Random.Class as R
 import Control.Monad.IO.Class (MonadIO(..))
@@ -80,7 +80,7 @@ evalRandomIO :: MonadIO m => RandomC R.StdGen m a -> m a
 evalRandomIO m = liftIO R.newStdGen >>= flip evalRandom m
 
 newtype RandomC g m a = RandomC { runRandomC :: StateC g m a }
-  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
+  deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
 instance (Algebra sig m, Effect sig, R.RandomGen g) => R.MonadRandom (RandomC g m) where
   getRandom = getRandom
