@@ -5,8 +5,8 @@
 module Control.Effect.Random
 ( -- * Random effect
   Random(..)
-, random
-, randomR
+, uniform
+, uniformR
 , interleave
   -- * Re-exports
 , Algebra
@@ -45,16 +45,16 @@ instance Effect Random where
 -- * bounded types (instances of 'Bounded', such as 'Char') typically sample all of the constructors.
 -- * fractional types, the range is normally the semi-closed interval [0,1).
 -- * for 'Integer', the range is (arbitrarily) the range of 'Int'.
-random :: (R.Random a, Has Random sig m) => m a
-random = send (Uniform pure)
+uniform :: (R.Random a, Has Random sig m) => m a
+uniform = send (Uniform pure)
 
 -- | Produce a random variable uniformly distributed in the given range.
 --
 -- @
 -- 'Data.Ix.inRange' (a, b) '<$>' 'randomR' (a, b) = 'pure' 'True'
 -- @
-randomR :: (R.Random a, Has Random sig m) => (a, a) -> m a
-randomR interval = send (UniformR interval pure)
+uniformR :: (R.Random a, Has Random sig m) => (a, a) -> m a
+uniformR interval = send (UniformR interval pure)
 
 -- | Run a computation by splitting the generator, using one half for the passed computation and the other for the continuation.
 --
