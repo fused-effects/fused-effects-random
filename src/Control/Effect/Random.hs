@@ -49,6 +49,7 @@ instance Effect Random where
 -- * for 'Integer', the range is (arbitrarily) the range of 'Int'.
 uniform :: (R.Random a, Has Random sig m) => m a
 uniform = send (Uniform pure)
+{-# INLINE uniform #-}
 
 -- | Produce a random variable uniformly distributed in the given range.
 --
@@ -57,6 +58,7 @@ uniform = send (Uniform pure)
 -- @
 uniformR :: (R.Random a, Has Random sig m) => (a, a) -> m a
 uniformR interval = send (UniformR interval pure)
+{-# INLINE uniformR #-}
 
 -- | Run a computation by splitting the generator, using one half for the passed computation and the other for the continuation.
 --
@@ -65,6 +67,7 @@ uniformR interval = send (UniformR interval pure)
 -- @
 interleave :: Has Random sig m => m a -> m a
 interleave m = send (Interleave m pure)
+{-# INLINE interleave #-}
 
 
 -- * Non-uniform distributions
@@ -73,3 +76,4 @@ exponential :: (R.Random a, Floating a, Has Random sig m) => a -> m a
 exponential a = do
   x <- uniform
   pure $! -log x / a
+{-# INLINE exponential #-}
