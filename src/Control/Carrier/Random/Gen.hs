@@ -9,7 +9,7 @@ module Control.Carrier.Random.Gen
   runRandom
 , evalRandom
 , execRandom
-, evalRandomIO
+, evalRandomSystem
 , RandomC(..)
 ) where
 
@@ -43,8 +43,8 @@ execRandom :: Functor m => g -> RandomC g m a -> m g
 execRandom g = fmap fst . runRandom g
 
 -- | Run a random computation in 'IO', splitting the global standard generator to get a new one for the computation.
-evalRandomIO :: MonadIO m => RandomC R.StdGen m a -> m a
-evalRandomIO m = liftIO R.newStdGen >>= flip evalRandom m
+evalRandomSystem :: MonadIO m => RandomC R.StdGen m a -> m a
+evalRandomSystem m = liftIO R.newStdGen >>= flip evalRandom m
 
 newtype RandomC g m a = RandomC { runRandomC :: StateC g m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
