@@ -34,7 +34,7 @@ common common
       -Wno-star-is-type
 
 library
-  import:              common
+  import: common
   exposed-modules:
     Control.Effect.Random
   build-depends:
