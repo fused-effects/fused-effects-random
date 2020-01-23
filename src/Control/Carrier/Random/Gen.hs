@@ -34,6 +34,7 @@ import qualified System.Random as R (Random(..), RandomGen(..), StdGen, newStdGe
 -- @
 runRandom :: g -> RandomC g m a -> m (g, a)
 runRandom g = runState g . runRandomC
+{-# INLINE runRandom #-}
 
 -- | Run a random computation starting from a given generator and discarding the final generator.
 --
@@ -42,6 +43,7 @@ runRandom g = runState g . runRandomC
 -- @
 evalRandom :: Functor m => g -> RandomC g m a -> m a
 evalRandom g = fmap snd . runRandom g
+{-# INLINE evalRandom #-}
 
 -- | Run a random computation starting from a given generator and discarding the final result.
 --
@@ -50,10 +52,12 @@ evalRandom g = fmap snd . runRandom g
 -- @
 execRandom :: Functor m => g -> RandomC g m a -> m g
 execRandom g = fmap fst . runRandom g
+{-# INLINE execRandom #-}
 
 -- | Run a random computation in 'IO', splitting the global standard generator to get a new one for the computation.
 evalRandomSystem :: MonadIO m => RandomC R.StdGen m a -> m a
 evalRandomSystem m = liftIO R.newStdGen >>= flip evalRandom m
+{-# INLINE evalRandomSystem #-}
 
 newtype RandomC g m a = RandomC { runRandomC :: StateC g m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
