@@ -62,7 +62,7 @@ evalRandomSystem m = liftIO R.newStdGen >>= flip evalRandom m
 newtype RandomC g m a = RandomC { runRandomC :: StateC g m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
-instance (Algebra sig m, Effect sig, R.RandomGen g) => Algebra (Random :+: sig) (RandomC g m) where
+instance (Algebra sig m, R.RandomGen g) => Algebra (Random :+: sig) (RandomC g m) where
   alg = \case
     L (Uniform      k) -> state R.random      >>= k
     L (UniformR r   k) -> state (R.randomR r) >>= k
