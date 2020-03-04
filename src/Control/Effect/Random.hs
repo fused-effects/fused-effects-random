@@ -1,6 +1,5 @@
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE ExistentialQuantification #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StandaloneDeriving #-}
 module Control.Effect.Random
 ( -- * Random effect
@@ -12,7 +11,6 @@ module Control.Effect.Random
 , exponential
   -- * Re-exports
 , Algebra
-, Effect
 , Has
 , run
 ) where
@@ -26,13 +24,6 @@ data Random m k
   | forall a . Interleave (m a) (a -> m k)
 
 deriving instance Functor m => Functor (Random m)
-
-instance Effect Random where
-  thread state handler = \case
-    Uniform      k -> Uniform                            (handler . (<$ state) . k)
-    UniformR r   k -> UniformR r                         (handler . (<$ state) . k)
-    Interleave m k -> Interleave (handler (m <$ state)) (handler . fmap k)
-  {-# INLINE thread #-}
 
 
 -- | Produce a random variable uniformly distributed in a range determined by its type’s 'R.Random' instance. For example:
