@@ -1,6 +1,4 @@
-{-# LANGUAGE DeriveFunctor #-}
-{-# LANGUAGE ExistentialQuantification #-}
-{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE GADTs #-}
 module Control.Effect.Random
 ( -- * Random effect
   Random(..)
@@ -18,12 +16,10 @@ module Control.Effect.Random
 import           Control.Algebra
 import qualified System.Random as R (Random(..))
 
-data Random m k
-  = forall a . R.Random a => Uniform (a -> m k)
-  | forall a . R.Random a => UniformR (a, a) (a -> m k)
-  | forall a . Interleave (m a) (a -> m k)
-
-deriving instance Functor m => Functor (Random m)
+data Random m k where
+  Uniform    :: R.Random a =>           Random m a
+  UniformR   :: R.Random a => (a, a) -> Random m a
+  Interleave :: m a                  -> Random m a
 
 
 -- | Produce a random variable uniformly distributed in a range determined by its type’s 'R.Random' instance. For example:
@@ -32,7 +28,7 @@ deriving instance Functor m => Functor (Random m)
 -- * fractional types, the range is normally the semi-closed interval [0,1).
 -- * for 'Integer', the range is (arbitrarily) the range of 'Int'.
 uniform :: (R.Random a, Has Random sig m) => m a
-uniform = send (Uniform pure)
+uniform = send Uniform
 {-# INLINE uniform #-}
 
 -- | Produce a random variable uniformly distributed in the given range.
@@ -41,7 +37,7 @@ uniform = send (Uniform pure)
 -- 'Data.Ix.inRange' (a, b) '<$>' 'randomR' (a, b) = 'pure' 'True'
 -- @
 uniformR :: (R.Random a, Has Random sig m) => (a, a) -> m a
-uniformR interval = send (UniformR interval pure)
+uniformR interval = send (UniformR interval)
 {-# INLINE uniformR #-}
 
 -- | Run a computation by splitting the generator, using one half for the passed computation and the other for the continuation.
@@ -50,7 +46,7 @@ uniformR interval = send (UniformR interval pure)
 -- 'interleave' ('pure' a) = 'pure' a
 -- @
 interleave :: Has Random sig m => m a -> m a
-interleave m = send (Interleave m pure)
+interleave m = send (Interleave m)
 {-# INLINE interleave #-}
 
 

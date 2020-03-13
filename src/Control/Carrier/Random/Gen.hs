@@ -64,14 +64,13 @@ newtype RandomC g m a = RandomC { runRandomC :: StateC g m a }
 
 instance (Algebra sig m, R.RandomGen g) => Algebra (Random :+: sig) (RandomC g m) where
   alg hdl sig ctx = case sig of
-    L (Uniform      k) -> state R.random      >>= hdl . (<$ ctx) . k
-    L (UniformR r   k) -> state (R.randomR r) >>= hdl . (<$ ctx) . k
-    L (Interleave m k) -> do
+    L Uniform        -> (<$ ctx) <$> state R.random
+    L (UniformR r  ) -> (<$ ctx) <$> state (R.randomR r)
+    L (Interleave m) -> do
       g2 <- state R.split
       a <- hdl (m <$ ctx)
-      RandomC (put g2)
-      hdl (fmap k a)
-    R other            -> RandomC (alg (runRandomC . hdl) (R other) ctx)
+      a <$ RandomC (put g2)
+    R other          -> RandomC (alg (runRandomC . hdl) (R other) ctx)
     where
     state :: (g -> (a, g)) -> RandomC g m a
     state f = RandomC (StateC (pure . swap . f))
