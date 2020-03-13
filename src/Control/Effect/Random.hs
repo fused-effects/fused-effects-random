@@ -29,15 +29,15 @@ deriving instance Functor m => Functor (Random m)
 
 instance HFunctor Random where
   hmap f = \case
-    Uniform      k -> Uniform           (f . k)
-    UniformR r   k -> UniformR r        (f . k)
+    Uniform      k -> Uniform          (f . k)
+    UniformR r   k -> UniformR r       (f . k)
     Interleave m k -> Interleave (f m) (f . k)
   {-# INLINE hmap #-}
 
 instance Effect Random where
   thread state handler = \case
-    Uniform      k -> Uniform                            (handler . (<$ state) . k)
-    UniformR r   k -> UniformR r                         (handler . (<$ state) . k)
+    Uniform      k -> Uniform                           (handler . (<$ state) . k)
+    UniformR r   k -> UniformR r                        (handler . (<$ state) . k)
     Interleave m k -> Interleave (handler (m <$ state)) (handler . fmap k)
   {-# INLINE thread #-}
 
