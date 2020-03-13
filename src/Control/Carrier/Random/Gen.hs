@@ -1,6 +1,5 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeOperators #-}
@@ -64,7 +63,7 @@ newtype RandomC g m a = RandomC { runRandomC :: StateC g m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
 instance (Algebra sig m, R.RandomGen g) => Algebra (Random :+: sig) (RandomC g m) where
-  alg ctx hdl = \case
+  alg hdl sig ctx = case sig of
     L (Uniform      k) -> state R.random      >>= hdl . (<$ ctx) . k
     L (UniformR r   k) -> state (R.randomR r) >>= hdl . (<$ ctx) . k
     L (Interleave m k) -> do
@@ -72,7 +71,7 @@ instance (Algebra sig m, R.RandomGen g) => Algebra (Random :+: sig) (RandomC g m
       a <- hdl (m <$ ctx)
       RandomC (put g2)
       hdl (fmap k a)
-    R other            -> RandomC (alg ctx (runRandomC . hdl) (R other))
+    R other            -> RandomC (alg (runRandomC . hdl) (R other) ctx)
     where
     state :: (g -> (a, g)) -> RandomC g m a
     state f = RandomC (StateC (pure . swap . f))
