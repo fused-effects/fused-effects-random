@@ -25,6 +25,7 @@ import qualified Control.Monad.Fail as Fail
 import           Control.Monad.Fix
 import           Control.Monad.IO.Class (MonadIO(..))
 import           Control.Monad.Trans.Class
+import           Data.Tuple (swap)
 import qualified System.Random as R (Random(..), RandomGen(..), StdGen, newStdGen)
 
 -- | Run a random computation starting from a given generator.
@@ -74,5 +75,5 @@ instance (Algebra sig m, Effect sig, R.RandomGen g) => Algebra (Random :+: sig) 
     R other            -> RandomC (send (handleCoercible other))
     where
     state :: (g -> (a, g)) -> RandomC g m a
-    state f = RandomC (gets f >>= \ ~(a, g') -> a <$ put g')
+    state f = RandomC (StateC (pure . swap . f))
   {-# INLINE alg #-}
