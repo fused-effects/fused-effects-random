@@ -17,7 +17,7 @@ extra-source-files:
   CHANGELOG.md
 
 common common
-  default-language:    Haskell2010
+  default-language: Haskell2010
   ghc-options:
     -Weverything
     -Wno-all-missed-specialisations
@@ -29,8 +29,6 @@ common common
     -Wno-name-shadowing
     -Wno-safe
     -Wno-unsafe
-  if (impl(ghc >= 8.6))
-    ghc-options: -Wno-star-is-type
   if (impl(ghc >= 8.8))
     ghc-options: -Wno-missing-deriving-strategies
 
@@ -40,12 +38,11 @@ library
     Control.Carrier.Random.Gen
     Control.Effect.Random
   build-depends:
-      base >=4.10 && <4.15
+    , base >=4.10 && <4.15
     , fused-effects ^>= 1
     , random ^>= 1.1
     , transformers >= 0.4 && <0.6
-  hs-source-dirs:      src
-  default-language:    Haskell2010
+  hs-source-dirs: src
 
 source-repository head
   type:     git

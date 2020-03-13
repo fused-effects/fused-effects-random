@@ -32,9 +32,6 @@ function flags {
 
   # .hs source dirs
   echo "-isrc"
-  echo "-ibenchmark"
-  echo "-iexamples"
-  echo "-itest"
 
   # disable automatic selection of packages
   echo "-hide-all-packages"
@@ -59,7 +56,6 @@ function flags {
   echo "-Wno-name-shadowing"
   echo "-Wno-safe"
   echo "-Wno-unsafe"
-  [[ "$ghc_version" = 8.6.* ]] || [[ "$ghc_version" = 8.8.* ]] && echo "-Wno-star-is-type" || true
   [[ "$ghc_version" = 8.8.* ]] && echo "-Wno-missing-deriving-strategies" || true
 }
 
