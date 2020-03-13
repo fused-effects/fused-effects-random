@@ -32,9 +32,6 @@ function flags {
 
   # .hs source dirs
   echo "-isrc"
-  echo "-ibenchmark"
-  echo "-iexamples"
-  echo "-itest"
 
   # disable automatic selection of packages
   echo "-hide-all-packages"
