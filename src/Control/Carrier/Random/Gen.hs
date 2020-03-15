@@ -10,7 +10,7 @@ module Control.Carrier.Random.Gen
 , evalRandom
 , execRandom
 , evalRandomSystem
-, RandomC(..)
+, RandomC(RandomC)
   -- * Random effect
 , module Control.Effect.Random
 ) where
