@@ -42,7 +42,7 @@ library
     Control.Carrier.Random.Gen
     Control.Effect.Random
   build-depends:
-    , base >=4.10 && <4.15
+    , base >=4.10 && < 5
     , fused-effects ^>= 1.1
     , random ^>= 1.1
     , transformers >= 0.4 && <0.6
