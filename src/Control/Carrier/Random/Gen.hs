@@ -1,6 +1,5 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeOperators #-}
@@ -11,21 +10,20 @@ module Control.Carrier.Random.Gen
 , evalRandom
 , execRandom
 , evalRandomSystem
-, RandomC(..)
+, RandomC(RandomC)
   -- * Random effect
 , module Control.Effect.Random
 ) where
 
 import           Control.Algebra
 import           Control.Applicative (Alternative)
-import           Control.Carrier.State.Strict
+import           Control.Carrier.State.Church
 import           Control.Effect.Random
 import           Control.Monad (MonadPlus)
 import qualified Control.Monad.Fail as Fail
 import           Control.Monad.Fix
 import           Control.Monad.IO.Class (MonadIO(..))
 import           Control.Monad.Trans.Class
-import           Data.Tuple (swap)
 import qualified System.Random as R (Random(..), RandomGen(..), StdGen, newStdGen)
 
 -- | Run a random computation starting from a given generator.
@@ -33,8 +31,8 @@ import qualified System.Random as R (Random(..), RandomGen(..), StdGen, newStdGe
 -- @
 -- 'runRandom' g ('pure' b) = 'pure' (g, b)
 -- @
-runRandom :: g -> RandomC g m a -> m (g, a)
-runRandom g = runState g . runRandomC
+runRandom :: Applicative m => g -> RandomC g m a -> m (g, a)
+runRandom g = runState (curry pure) g . runRandomC
 {-# INLINE runRandom #-}
 
 -- | Run a random computation starting from a given generator and discarding the final generator.
@@ -42,8 +40,8 @@ runRandom g = runState g . runRandomC
 -- @
 -- 'evalRandom' g ('pure' b) = 'pure' b
 -- @
-evalRandom :: Functor m => g -> RandomC g m a -> m a
-evalRandom g = fmap snd . runRandom g
+evalRandom :: Applicative m => g -> RandomC g m a -> m a
+evalRandom g = evalState g . runRandomC
 {-# INLINE evalRandom #-}
 
 -- | Run a random computation starting from a given generator and discarding the final result.
@@ -51,8 +49,8 @@ evalRandom g = fmap snd . runRandom g
 -- @
 -- 'execRandom' g ('pure' b) = g
 -- @
-execRandom :: Functor m => g -> RandomC g m a -> m g
-execRandom g = fmap fst . runRandom g
+execRandom :: Applicative m => g -> RandomC g m a -> m g
+execRandom g = execState g . runRandomC
 {-# INLINE execRandom #-}
 
 -- | Run a random computation in 'IO', splitting the global standard generator to get a new one for the computation.
@@ -63,17 +61,11 @@ evalRandomSystem m = liftIO R.newStdGen >>= flip evalRandom m
 newtype RandomC g m a = RandomC { runRandomC :: StateC g m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
-instance (Algebra sig m, Effect sig, R.RandomGen g) => Algebra (Random :+: sig) (RandomC g m) where
-  alg = \case
-    L (Uniform      k) -> state R.random      >>= k
-    L (UniformR r   k) -> state (R.randomR r) >>= k
-    L (Interleave m k) -> do
-      g2 <- state R.split
-      a <- m
-      RandomC (put g2)
-      k a
-    R other            -> RandomC (send (handleCoercible other))
-    where
-    state :: (g -> (a, g)) -> RandomC g m a
-    state f = RandomC (StateC (pure . swap . f))
+instance (Algebra sig m, R.RandomGen g) => Algebra (Random :+: sig) (RandomC g m) where
+  alg hdl sig ctx = RandomC $ case sig of
+    L random -> StateC $ \ k g -> case random of
+      Uniform      -> let (a,   g') = R.random    g in k g' (a <$ ctx)
+      UniformR r   -> let (a,   g') = R.randomR r g in k g' (a <$ ctx)
+      Interleave m -> let (g'', g') = R.split     g in runState (const (k g'')) g' (runRandomC (hdl (m <$ ctx)))
+    R other  -> alg (runRandomC . hdl) (R other) ctx
   {-# INLINE alg #-}
