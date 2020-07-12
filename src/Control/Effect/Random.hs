@@ -34,7 +34,7 @@ uniform = send Uniform
 -- | Produce a random variable uniformly distributed in the given range.
 --
 -- @
--- 'Data.Ix.inRange' (a, b) '<$>' 'randomR' (a, b) = 'pure' 'True'
+-- 'Data.Ix.inRange' (a, b) '<$>' 'uniformR' (a, b) = 'pure' 'True'
 -- @
 uniformR :: (R.Random a, Has Random sig m) => (a, a) -> m a
 uniformR interval = send (UniformR interval)
