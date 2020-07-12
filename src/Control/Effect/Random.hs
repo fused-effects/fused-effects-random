@@ -1,4 +1,7 @@
 {-# LANGUAGE GADTs #-}
+-- | Random variables in uniform and exponential distributions, with interleaving.
+--
+-- @since 1.0
 module Control.Effect.Random
 ( -- * Random effect
   Random(..)
