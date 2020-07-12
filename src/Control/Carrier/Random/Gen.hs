@@ -4,6 +4,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
+-- | A carrier for "Control.Effect.Random".'Random' implemented using 'R.RandomGen'.
 module Control.Carrier.Random.Gen
 ( -- * Random carrier
   runRandom
