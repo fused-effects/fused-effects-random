@@ -69,6 +69,9 @@ evalRandomSystem :: MonadIO m => RandomC R.StdGen m a -> m a
 evalRandomSystem m = liftIO R.newStdGen >>= flip evalRandom m
 {-# INLINE evalRandomSystem #-}
 
+-- | A carrier for 'Random' implemented using 'R.RandomGen'.
+--
+-- @since 1.0
 newtype RandomC g m a = RandomC { runRandomC :: StateC g m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
