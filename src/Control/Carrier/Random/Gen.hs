@@ -4,6 +4,9 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
+-- | A carrier for "Control.Effect.Random".'Random' implemented using 'R.RandomGen'.
+--
+-- @since 1.1
 module Control.Carrier.Random.Gen
 ( -- * Random carrier
   runRandom
@@ -31,6 +34,8 @@ import qualified System.Random as R (Random(..), RandomGen(..), StdGen, newStdGe
 -- @
 -- 'runRandom' g ('pure' b) = 'pure' (g, b)
 -- @
+--
+-- @since 1.0
 runRandom :: Applicative m => g -> RandomC g m a -> m (g, a)
 runRandom g = runState (curry pure) g . runRandomC
 {-# INLINE runRandom #-}
@@ -40,6 +45,8 @@ runRandom g = runState (curry pure) g . runRandomC
 -- @
 -- 'evalRandom' g ('pure' b) = 'pure' b
 -- @
+--
+-- @since 1.0
 evalRandom :: Applicative m => g -> RandomC g m a -> m a
 evalRandom g = evalState g . runRandomC
 {-# INLINE evalRandom #-}
@@ -49,15 +56,22 @@ evalRandom g = evalState g . runRandomC
 -- @
 -- 'execRandom' g ('pure' b) = g
 -- @
+--
+-- @since 1.0
 execRandom :: Applicative m => g -> RandomC g m a -> m g
 execRandom g = execState g . runRandomC
 {-# INLINE execRandom #-}
 
 -- | Run a random computation in 'IO', splitting the global standard generator to get a new one for the computation.
+--
+-- @since 1.1
 evalRandomSystem :: MonadIO m => RandomC R.StdGen m a -> m a
 evalRandomSystem m = liftIO R.newStdGen >>= flip evalRandom m
 {-# INLINE evalRandomSystem #-}
 
+-- | A carrier for 'Random' implemented using 'R.RandomGen'.
+--
+-- @since 1.0
 newtype RandomC g m a = RandomC { runRandomC :: StateC g m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 

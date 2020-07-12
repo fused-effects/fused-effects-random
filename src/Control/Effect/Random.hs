@@ -1,4 +1,7 @@
 {-# LANGUAGE GADTs #-}
+-- | Random variables in uniform and exponential distributions, with interleaving.
+--
+-- @since 1.0
 module Control.Effect.Random
 ( -- * Random effect
   Random(..)
@@ -16,6 +19,9 @@ module Control.Effect.Random
 import           Control.Algebra
 import qualified System.Random as R (Random(..))
 
+-- | Uniformly-distributed random variables, with interleaving.
+--
+-- @since 1.0
 data Random m k where
   Uniform    :: R.Random a =>           Random m a
   UniformR   :: R.Random a => (a, a) -> Random m a
@@ -27,6 +33,8 @@ data Random m k where
 -- * bounded types (instances of 'Bounded', such as 'Char') typically sample all of the constructors.
 -- * fractional types, the range is normally the semi-closed interval [0,1).
 -- * for 'Integer', the range is (arbitrarily) the range of 'Int'.
+--
+-- @since 1.1
 uniform :: (R.Random a, Has Random sig m) => m a
 uniform = send Uniform
 {-# INLINE uniform #-}
@@ -34,8 +42,10 @@ uniform = send Uniform
 -- | Produce a random variable uniformly distributed in the given range.
 --
 -- @
--- 'Data.Ix.inRange' (a, b) '<$>' 'randomR' (a, b) = 'pure' 'True'
+-- 'Data.Ix.inRange' (a, b) '<$>' 'uniformR' (a, b) = 'pure' 'True'
 -- @
+--
+-- @since 1.1
 uniformR :: (R.Random a, Has Random sig m) => (a, a) -> m a
 uniformR interval = send (UniformR interval)
 {-# INLINE uniformR #-}
@@ -45,6 +55,8 @@ uniformR interval = send (UniformR interval)
 -- @
 -- 'interleave' ('pure' a) = 'pure' a
 -- @
+--
+-- @since 1.0
 interleave :: Has Random sig m => m a -> m a
 interleave m = send (Interleave m)
 {-# INLINE interleave #-}
@@ -53,6 +65,8 @@ interleave m = send (Interleave m)
 -- * Non-uniform distributions
 
 -- | Produce a random variable in an expnoential distribution with the given scale.
+--
+-- @since 1.1
 exponential :: (R.Random a, Floating a, Has Random sig m) => a -> m a
 exponential a = do
   x <- uniform

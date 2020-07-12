@@ -1,7 +1,7 @@
 cabal-version:       2.2
 
 name:                fused-effects-random
-version:             1.0.0.0
+version:             1.1.0.0
 synopsis:            Random number generation for fused-effects.
 description:         Random number generation as an effect using fused-effects.
 homepage:            https://github.com/fused-effects/fused-effects-random
@@ -10,11 +10,12 @@ license:             BSD-3-Clause
 license-file:        LICENSE
 author:              Rob Rix
 maintainer:          robrix@github.com
-copyright:           2019 Rob Rix
+copyright:           2019-2020 Rob Rix
 category:            Control
 build-type:          Simple
 extra-source-files:
   CHANGELOG.md
+  README.md
 
 common common
   default-language: Haskell2010

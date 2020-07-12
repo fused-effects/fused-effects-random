@@ -1,4 +1,13 @@
+# 1.1
+
+- Support for `random` 1.2.
+
+- Support for `ghc` 8.10.
+
+
 ## Backwards-incompatible changes
+
+- Support for `fused-effects` 1.1.
 
 - Moves the `RandomC` carrier into its own module, `Control.Carrier.Random.Gen`.
 
