@@ -19,6 +19,7 @@ module Control.Effect.Random
 import           Control.Algebra
 import qualified System.Random as R (Random(..))
 
+-- | Uniformly-distributed random variables, with interleaving.
 data Random m k where
   Uniform    :: R.Random a =>           Random m a
   UniformR   :: R.Random a => (a, a) -> Random m a
