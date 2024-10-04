@@ -1,3 +1,8 @@
+# 1.1.0.1
+
+- Support for `ghc`s through 9.10.1.
+
+
 # 1.1
 
 - Support for `random` 1.2.
